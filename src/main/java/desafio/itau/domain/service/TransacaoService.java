@@ -11,7 +11,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 @Service
 @AllArgsConstructor
@@ -36,5 +43,18 @@ public class TransacaoService {
         log.info("Deletando as transações");
         transacaoRepository.limpar();
         return ResponseEntity.ok().build();
+    }
+
+    public ResponseEntity<DoubleSummaryStatistics> estatisticas(OffsetDateTime horaInicial) {
+        log.info("Calculando as estatísticas");
+        List<Transacao> transacoes = transacaoRepository.getTransacoes();
+
+        BigDecimal[] valoresFiltrados = transacoes.stream()
+                .filter(t -> t.getDataHora().isAfter(horaInicial) || t.getDataHora().isEqual(horaInicial))
+                .map(t -> t.getValor())
+                .toArray(BigDecimal[]::new);
+
+        DoubleStream doubleStream = Arrays.stream(valoresFiltrados).mapToDouble(BigDecimal::doubleValue);
+        return ResponseEntity.ok(doubleStream.summaryStatistics());
     }
 }

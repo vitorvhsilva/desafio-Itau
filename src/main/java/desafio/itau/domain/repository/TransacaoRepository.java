@@ -12,4 +12,12 @@ import java.util.List;
 @Data
 public class TransacaoRepository {
     private List<Transacao> transacoes;
+
+    public void salvar(Transacao transacao) {
+        transacoes.add(transacao);
+    }
+
+    public void limpar() {
+        transacoes.clear();
+    }
 }

@@ -4,13 +4,12 @@ import desafio.itau.api.dto.TransacaoDTO;
 import desafio.itau.domain.exception.ItauException;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 
 @Component
-public class ValidarValor implements ValidacaoStrategy{
-
+public class ValidarDataHora implements ValidacaoStrategy{
     @Override
     public void validar(TransacaoDTO dto) {
-        if (dto.getValor().compareTo(BigDecimal.ZERO) < 0 ) throw new ItauException("Valor da transação negativo");
+        if (dto.getDataHora().isAfter(OffsetDateTime.now())) throw new ItauException("Data da transação não aceita!");
     }
 }

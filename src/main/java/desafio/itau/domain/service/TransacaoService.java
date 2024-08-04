@@ -1,5 +1,6 @@
 package desafio.itau.domain.service;
 
+import desafio.itau.api.dto.EstatisticaDTO;
 import desafio.itau.api.dto.TransacaoDTO;
 import desafio.itau.domain.model.Transacao;
 import desafio.itau.domain.repository.TransacaoRepository;
@@ -45,9 +46,13 @@ public class TransacaoService {
         return ResponseEntity.ok().build();
     }
 
-    public ResponseEntity<DoubleSummaryStatistics> estatisticas(OffsetDateTime horaInicial) {
+    public ResponseEntity<EstatisticaDTO> estatisticas(OffsetDateTime horaInicial) {
         log.info("Calculando as estatísticas");
         List<Transacao> transacoes = transacaoRepository.getTransacoes();
+
+        if (transacoes.isEmpty()) {
+            return ResponseEntity.ok(new EstatisticaDTO());
+        }
 
         BigDecimal[] valoresFiltrados = transacoes.stream()
                 .filter(t -> t.getDataHora().isAfter(horaInicial) || t.getDataHora().isEqual(horaInicial))
@@ -55,6 +60,6 @@ public class TransacaoService {
                 .toArray(BigDecimal[]::new);
 
         DoubleStream doubleStream = Arrays.stream(valoresFiltrados).mapToDouble(BigDecimal::doubleValue);
-        return ResponseEntity.ok(doubleStream.summaryStatistics());
+        return ResponseEntity.ok(new EstatisticaDTO(doubleStream.summaryStatistics()));
     }
 }
